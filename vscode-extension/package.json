@@ -3,7 +3,7 @@
   "displayName": "NZR Dev Plugin",
   "description": "Remote VSCode control from mobile devices",
   "version": "0.1.0",
-  "publisher": "nzrgroup",
+  "publisher": "AlairJoaoTavares",
   "icon": "images/icon.png",
   "galleryBanner": {
     "color": "#1e1e1e",
