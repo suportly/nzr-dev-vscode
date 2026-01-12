@@ -1,0 +1,448 @@
+openapi: 3.1.0
+info:
+  title: NZR Dev Plugin Relay API
+  description: REST API for the relay server handling device registration, authentication, and push notifications
+  version: 1.0.0
+  contact:
+    name: NZR Group
+servers:
+  - url: https://relay.nzr.dev/api/v1
+    description: Production relay server
+  - url: http://localhost:3001/api/v1
+    description: Local development
+
+tags:
+  - name: Auth
+    description: Authentication and pairing operations
+  - name: Devices
+    description: Device registration and management
+  - name: Notifications
+    description: Push notification operations
+
+paths:
+  /auth/pair/init:
+    post:
+      tags:
+        - Auth
+      summary: Initialize pairing session
+      description: Called by VSCode extension to generate pairing token and QR code data
+      operationId: initPairing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - deviceId
+                - workspaceId
+                - workspaceName
+              properties:
+                deviceId:
+                  type: string
+                  format: uuid
+                  description: VSCode device ID
+                workspaceId:
+                  type: string
+                  format: uuid
+                  description: Workspace being shared
+                workspaceName:
+                  type: string
+                  maxLength: 100
+                  description: Human-readable workspace name
+                generatePin:
+                  type: boolean
+                  default: false
+                  description: Also generate a PIN code
+      responses:
+        '200':
+          description: Pairing session initialized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pairingToken:
+                    type: string
+                    description: Token for QR code (32 bytes, base64)
+                  pin:
+                    type: string
+                    pattern: '^\d{6}$'
+                    description: 6-digit PIN (if requested)
+                  expiresAt:
+                    type: string
+                    format: date-time
+                    description: Token expiration time
+                  qrData:
+                    type: string
+                    description: Full QR code payload (JSON stringified)
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/pair/complete:
+    post:
+      tags:
+        - Auth
+      summary: Complete pairing with token or PIN
+      description: Called by mobile app after scanning QR code or entering PIN
+      operationId: completePairing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - deviceId
+                - deviceName
+                - platform
+              properties:
+                deviceId:
+                  type: string
+                  format: uuid
+                  description: Mobile device ID
+                deviceName:
+                  type: string
+                  maxLength: 100
+                  description: Mobile device name
+                platform:
+                  type: string
+                  enum: [ios, android]
+                pairingToken:
+                  type: string
+                  description: Token from QR code
+                pin:
+                  type: string
+                  pattern: '^\d{6}$'
+                  description: Alternative PIN code
+                pushToken:
+                  type: string
+                  description: Expo push notification token
+      responses:
+        '200':
+          description: Pairing successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Invalid or expired pairing token/PIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Refresh access token
+      description: Exchange refresh token for new access token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  description: Valid refresh token
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/revoke:
+    post:
+      tags:
+        - Auth
+      summary: Revoke session
+      description: Invalidate current session and tokens
+      operationId: revokeSession
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Session revoked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /devices:
+    get:
+      tags:
+        - Devices
+      summary: List authorized devices
+      description: Get all devices authorized for current session
+      operationId: listDevices
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of devices
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  devices:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Device'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /devices/{deviceId}:
+    delete:
+      tags:
+        - Devices
+      summary: Revoke device authorization
+      description: Remove a device from authorized list
+      operationId: revokeDevice
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Device authorization revoked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /devices/{deviceId}/push-token:
+    put:
+      tags:
+        - Devices
+      summary: Update push notification token
+      description: Update the push notification token for a mobile device
+      operationId: updatePushToken
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pushToken
+              properties:
+                pushToken:
+                  type: string
+                  description: New Expo push token
+      responses:
+        '204':
+          description: Push token updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /notifications/send:
+    post:
+      tags:
+        - Notifications
+      summary: Send push notification
+      description: Send a push notification to connected mobile devices (called by VSCode extension)
+      operationId: sendNotification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - body
+              properties:
+                title:
+                  type: string
+                  maxLength: 100
+                  description: Notification title
+                body:
+                  type: string
+                  maxLength: 500
+                  description: Notification body
+                data:
+                  type: object
+                  description: Custom data payload
+                targetDeviceIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Specific devices (omit for all)
+                priority:
+                  type: string
+                  enum: [default, high]
+                  default: default
+      responses:
+        '202':
+          description: Notification queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notificationId:
+                    type: string
+                    format: uuid
+                  sentTo:
+                    type: integer
+                    description: Number of devices notified
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+                  timestamp:
+                    type: string
+                    format: date-time
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AuthTokens:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token (24h validity)
+        refreshToken:
+          type: string
+          description: JWT refresh token (7d validity)
+        expiresIn:
+          type: integer
+          description: Access token validity in seconds
+        workspaceId:
+          type: string
+          format: uuid
+        workspaceName:
+          type: string
+        vscodeDeviceId:
+          type: string
+          format: uuid
+
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [vscode, mobile]
+        name:
+          type: string
+        platform:
+          type: string
+        appVersion:
+          type: string
+        lastSeenAt:
+          type: string
+          format: date-time
+        isOnline:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable message
+        details:
+          type: object
+          description: Additional error details
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    RateLimited:
+      description: Too many requests
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until rate limit resets
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

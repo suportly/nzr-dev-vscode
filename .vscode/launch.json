@@ -1,0 +1,107 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Extension: Run",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/vscode-extension"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/vscode-extension/dist/**/*.js"
+      ],
+      "preLaunchTask": "Build Extension",
+      "sourceMaps": true
+    },
+    {
+      "name": "Extension: Watch & Run",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/vscode-extension"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/vscode-extension/dist/**/*.js"
+      ],
+      "preLaunchTask": "Watch Extension",
+      "sourceMaps": true
+    },
+    {
+      "name": "Relay Server: Debug",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/relay-server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "envFile": "${workspaceFolder}/relay-server/.env"
+    },
+    {
+      "name": "Relay Server: Debug (ts-node)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/relay-server",
+      "program": "${workspaceFolder}/relay-server/src/index.ts",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "envFile": "${workspaceFolder}/relay-server/.env",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "Mobile App: Expo Start",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/mobile-app",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["expo", "start"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Mobile App: Expo iOS",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/mobile-app",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["expo", "start", "--ios"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Mobile App: Expo Android",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/mobile-app",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["expo", "start", "--android"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Shared: Build",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/shared",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "build"],
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack: Extension + Relay",
+      "configurations": ["Extension: Run", "Relay Server: Debug"],
+      "stopAll": true
+    },
+    {
+      "name": "Full Stack: All Services",
+      "configurations": ["Extension: Run", "Relay Server: Debug", "Mobile App: Expo Start"],
+      "stopAll": true
+    }
+  ]
+}

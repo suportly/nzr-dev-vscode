@@ -1,0 +1,24 @@
+# Source files
+.vscode/**
+.vscode-test/**
+src/**
+**/*.ts
+!**/*.d.ts
+**/*.map
+
+# Config files
+.gitignore
+.eslintrc.js
+tsconfig.json
+PUBLISHING.md
+app.json
+
+# Tests
+**/*.test.js
+**/test/**
+
+# Dependencies (bundled via esbuild)
+node_modules/**
+
+# Parent directory (workspace symlinks)
+../**

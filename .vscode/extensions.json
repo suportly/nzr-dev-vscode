@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "msjsdiag.vscode-react-native",
+    "ms-azuretools.vscode-docker",
+    "humao.rest-client"
+  ]
+}

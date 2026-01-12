@@ -1,0 +1,111 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Extension",
+      "type": "shell",
+      "command": "npm run compile",
+      "options": {
+        "cwd": "${workspaceFolder}/vscode-extension"
+      },
+      "problemMatcher": "$tsc",
+      "group": "build"
+    },
+    {
+      "label": "Watch Extension",
+      "type": "shell",
+      "command": "npm run watch",
+      "options": {
+        "cwd": "${workspaceFolder}/vscode-extension"
+      },
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "group": "build"
+    },
+    {
+      "label": "Build Relay Server",
+      "type": "npm",
+      "script": "build",
+      "path": "relay-server",
+      "problemMatcher": "$tsc",
+      "group": "build"
+    },
+    {
+      "label": "Build Shared",
+      "type": "npm",
+      "script": "build",
+      "path": "shared",
+      "problemMatcher": "$tsc",
+      "group": "build"
+    },
+    {
+      "label": "Build All",
+      "dependsOn": ["Build Shared", "Build Extension", "Build Relay Server"],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Install Dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint All",
+      "type": "npm",
+      "script": "lint",
+      "problemMatcher": ["$eslint-stylish"],
+      "group": "test"
+    },
+    {
+      "label": "Test Extension",
+      "type": "npm",
+      "script": "test",
+      "path": "vscode-extension",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Test Relay Server",
+      "type": "npm",
+      "script": "test",
+      "path": "relay-server",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Test Mobile App",
+      "type": "npm",
+      "script": "test",
+      "path": "mobile-app",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Typecheck All",
+      "type": "shell",
+      "command": "npm run typecheck",
+      "problemMatcher": "$tsc",
+      "group": "build"
+    },
+    {
+      "label": "Start Redis (Docker)",
+      "type": "shell",
+      "command": "docker run -d -p 6379:6379 --name nzr-redis redis:alpine || docker start nzr-redis",
+      "problemMatcher": []
+    },
+    {
+      "label": "Stop Redis (Docker)",
+      "type": "shell",
+      "command": "docker stop nzr-redis",
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "name": "nzr-dev-vscode",
+  "displayName": "NZR Dev Plugin",
+  "description": "Remote VSCode control from mobile devices",
+  "version": "0.1.0",
+  "publisher": "nzrgroup",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "remote",
+    "mobile",
+    "control",
+    "websocket"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "nzr-dev.generatePairingCode",
+        "title": "NZR Dev: Generate Pairing QR Code"
+      },
+      {
+        "command": "nzr-dev.showConnectedDevices",
+        "title": "NZR Dev: Show Connected Devices"
+      },
+      {
+        "command": "nzr-dev.disconnectAll",
+        "title": "NZR Dev: Disconnect All Devices"
+      },
+      {
+        "command": "nzr-dev.toggleTunnel",
+        "title": "NZR Dev: Toggle Internet Tunnel"
+      },
+      {
+        "command": "nzr-dev.showConfiguration",
+        "title": "NZR Dev: Show Configuration"
+      }
+    ],
+    "configuration": {
+      "title": "NZR Dev Plugin",
+      "properties": {
+        "nzr-dev.localPort": {
+          "type": "number",
+          "default": 3002,
+          "description": "Local WebSocket server port for direct connections"
+        },
+        "nzr-dev.relayPort": {
+          "type": "number",
+          "default": 3004,
+          "description": "Local relay server port (used for tunnel connections)"
+        },
+        "nzr-dev.enableMdns": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable mDNS/Bonjour discovery for local network"
+        },
+        "nzr-dev.autoStartTunnel": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically start internet tunnel on extension activation"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "compile": "npx tsc -p ./",
+    "build": "npm run esbuild-base",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "watch": "npm run esbuild-base -- --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "npx tsc --noEmit",
+    "package": "npx vsce package",
+    "test": "npx jest"
+  },
+  "dependencies": {
+    "@nzr-dev/shared": "*",
+    "bonjour-service": "^1.1.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "localtunnel": "^2.0.2",
+    "qrcode": "^1.5.3",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
+    "uuid": "^9.0.1",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.11",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/localtunnel": "^2.0.4",
+    "@types/qrcode": "^1.5.5",
+    "@types/uuid": "^9.0.7",
+    "@types/vscode": "^1.85.0",
+    "@types/ws": "^8.5.10",
+    "@vscode/vsce": "^3.7.1",
+    "esbuild": "^0.27.2",
+    "jest": "^29.7.0",
+    "typescript": "^5.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nzrgroup/nzr-dev-plugin"
+  },
+  "license": "MIT"
+}

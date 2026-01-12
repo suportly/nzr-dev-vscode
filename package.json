@@ -1,0 +1,48 @@
+{
+  "name": "nzr-dev-plugin",
+  "version": "0.1.0",
+  "description": "Remote VSCode control from mobile devices with AI integration",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "vscode-extension",
+    "relay-server",
+    "mobile-app"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:shared": "npm run build -w shared",
+    "build:extension": "npm run build -w vscode-extension",
+    "build:relay": "npm run build -w relay-server",
+    "build:mobile": "npm run build -w mobile-app",
+    "dev:relay": "npm run dev -w relay-server",
+    "dev:mobile": "npm run start -w mobile-app",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/node-fetch": "^2.6.13",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nzrgroup/nzr-dev-plugin.git"
+  },
+  "author": "NZR Group",
+  "license": "MIT"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@nzr-dev/shared",
+  "version": "0.1.0",
+  "description": "Shared TypeScript types for NZR Dev Plugin",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "license": "MIT"
+}

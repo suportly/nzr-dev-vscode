@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "NZR Dev",
+    "slug": "nzr-dev-mobile",
+    "version": "0.1.0",
+    "sdkVersion": "54.0.0",
+    "orientation": "portrait",
+    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1E1E1E"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.nzr.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "NZR Dev needs camera access to scan QR codes for pairing with VSCode.",
+        "NSLocalNetworkUsageDescription": "NZR Dev needs local network access to discover VSCode instances on your network."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1E1E1E"
+      },
+      "package": "dev.nzr.mobile",
+      "permissions": ["CAMERA", "INTERNET", "ACCESS_NETWORK_STATE", "ACCESS_WIFI_STATE"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow NZR Dev to access your camera to scan QR codes."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#007ACC"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "14c4bfb7-9d63-4747-a358-70691174a986"
+      }
+    }
+  }
+}
