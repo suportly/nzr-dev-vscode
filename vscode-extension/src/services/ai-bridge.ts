@@ -347,7 +347,7 @@ export class AIBridgeService extends EventEmitter {
       let stderr = '';
       let timedOut = false;
 
-      logger.debug(`Spawning Claude CLI with message: ${message.substring(0, 50)}...`);
+      logger.debug(`Spawning Claude CLI with message via stdin`);
       logger.debug(`CWD: ${cwd}`);
 
       // Ensure critical environment variables are set
@@ -358,11 +358,12 @@ export class AIBridgeService extends EventEmitter {
         PATH: process.env.PATH || '/usr/local/bin:/usr/bin:/bin',
       };
 
-      // Spawn Claude CLI and pass message via stdin to avoid shell escaping issues
-      const proc = spawn(claudePath, ['-p', '--dangerously-skip-permissions'], {
+      // Spawn Claude CLI using stdbuf to force unbuffered/line-buffered output for real-time streaming
+      // This ensures the output is streamed as it's produced rather than buffered until completion
+      const proc = spawn('stdbuf', ['-oL', '-eL', claudePath, '-p', '--dangerously-skip-permissions'], {
         cwd,
         env,
-        stdio: ['pipe', 'pipe', 'pipe'], // Use pipe for stdin to send message
+        stdio: ['pipe', 'pipe', 'pipe'],
       });
 
       // Write message to stdin and close it
